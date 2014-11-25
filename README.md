@@ -1,3 +1,5 @@
+## Bourne Liu
+
 ## Core Motion Pedometer Plugin for Apache Cordova
 
 **Fetch pedestrian-related pedometer data, such as step counts and other information about the distance travelled.**
