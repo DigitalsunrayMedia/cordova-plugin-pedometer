@@ -72,7 +72,7 @@
 - (void) queryPedometerDataAll:(CDVInvokedUrlCommand*)command;
 {
 
-    int dayOffset = -7;
+    int dayOffset = 0;
   
     NSDate *rightNow = [[NSDate alloc] init];
       
@@ -90,7 +90,7 @@
 
     __block CDVPluginResult* pluginResult = nil;
 
-    [self.pedometer startPedometerUpdatesFromDate:beginningOfDay withHandler:^(CMPedometerData *pedometerData, NSError *error) {
+    [self.pedometer queryPedometerDataFromDate:beginningOfDay toDate:[NSDate date] withHandler:^(CMPedometerData *pedometerData, NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
             if (error)
             {
