@@ -29,5 +29,10 @@ Pedometer.prototype.queryPedometerDataAll = function (onSuccess, onError) {
     exec(onSuccess, onError, "Pedometer", "queryPedometerDataAll", []);
 };
 
+Pedometer.prototype.queryActivityStartingFromDate = function (onSuccess, onError) {
+    exec(onSuccess, onError, "Pedometer", "queryActivityStartingFromDate", []);
+};
+
+
 
 module.exports = new Pedometer();
