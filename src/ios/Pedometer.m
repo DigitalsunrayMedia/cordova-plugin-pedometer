@@ -11,9 +11,17 @@
 @interface Pedometer ()
     @property (nonatomic, strong) CMPedometer *pedometer;
     @property (nonatomic, strong) CMStepCounter *stepCounter;
+    @property (nonatomic, strong) CMMotionActivityManager *motionActivityManager;
 @end
 
 @implementation Pedometer
+{
+   CMStepCounter *_stepCounter;
+   NSInteger _stepsToday;
+   NSInteger _stepsAtBeginOfLiveCounting;
+   BOOL _isLiveCounting;
+   NSOperationQueue *_stepQueue;
+}
 
 - (instancetype)init
 {
@@ -39,9 +47,11 @@
       // queue for step count updating
       _stepQueue = [[NSOperationQueue alloc] init];
       _stepQueue.maxConcurrentOperationCount = 1;
+
+       self.motionActivityManager = [[CMMotionActivityManager alloc] init];
  
       // start counting
-     // [self _updateStepsTodayFromHistoryLive:YES];
+  //    [self _updateStepsTodayFromHistoryLive:YES];
    }
  
    return self;
@@ -51,6 +61,7 @@
 {
    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
+
 
 
 - (void) isStepCountingAvailable:(CDVInvokedUrlCommand*)command;
@@ -156,7 +167,7 @@
 - (void) queryActivityStartingFromDate:(CDVInvokedUrlCommand*)command;
 {
 
-    NSOperationQueue *stepQueue;
+    
 
     int dayOffset = 0;
   
@@ -172,15 +183,15 @@
 
     NSDate *beginningOfDay = [cal dateFromComponents:calComponents];
 
-    self.stepCounter = [[CMStepCounter alloc] init];
+   
 
     __block CDVPluginResult* pluginResult = nil;
 
-    [self.stepCounter queryActivityStartingFromDate:beginningOfDay toDate:[NSDate date] 
-                toQueue: stepQueue
+    [self.motionActivityManager queryActivityStartingFromDate:beginningOfDay toDate:[NSDate date] 
+                toQueue: _stepQueue
                 withHandler:^(NSArray *activities, NSError *error) {
 
-        dispatch_async(dispatch_get_main_queue(), ^{
+       
             if (error)
             {
                 pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]];
@@ -192,7 +203,7 @@
             }
 
             [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        });
+       
     }];
 }
 
