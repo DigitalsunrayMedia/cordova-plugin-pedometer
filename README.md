@@ -1,4 +1,4 @@
-## Bourne Liu
+###### Version 0.1.2 - Fork by danurna based on Bourne Liu's version
 
 ## Core Motion Pedometer Plugin for Apache Cordova
 
@@ -7,7 +7,7 @@
 ## Install
 
 ```
-cordova plugin add https://github.com/leecrossley/cordova-plugin-pedometer.git
+cordova plugin add https://github.com/danurna/cordova-plugin-pedometer.git
 ```
 
 You **do not** need to reference any JavaScript, the Cordova plugin architecture will add a pedometer object to your root automatically when you build.
@@ -42,6 +42,19 @@ Floor counting indicates the ability to count the number of floors the user walk
 
 This capability is not supported on all devices, even with iOS 8.
 
+## Pedometer data 
+### queryPedometerDataAll
+```js
+pedometer.queryPedometerDataAll(successCallback, failureCallback);
+```
+Queries the steps taken for the current day. 
+
+
+### queryActivityStartingFromDate
+```js
+pedometer.queryActivityStartingFromDate(successCallback, failureCallback);
+```
+Queries activites...
 
 ## Live pedometer data
 
@@ -73,7 +86,7 @@ pedometer.stopPedometerUpdates(successCallback, failureCallback);
 
 ## Platform and device support
 
-iOS 8+ only. These capabilities are not supported on all devices, even with iOS 8, so please ensure you use the *check feature support* functions.
+iOS 7+ only. These capabilities are not supported on all devices, even with iOS 7, so please ensure you use the *check feature support* functions.
 
 ## License
 
