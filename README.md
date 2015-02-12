@@ -42,19 +42,35 @@ Floor counting indicates the ability to count the number of floors the user walk
 
 This capability is not supported on all devices, even with iOS 8.
 
-## Pedometer data 
-### queryPedometerDataAll
+## Pedometer data
+### getPedometerDataAll
 ```js
-pedometer.queryPedometerDataAll(successCallback, failureCallback);
+pedometer.getPedometerDataAll(successCallback, failureCallback);
 ```
-Queries the steps taken for the current day. 
+Queries the steps taken for the current day. Calls successCallback with pedometerData (see startPedometerUpdates).
+
+### getPedometerDataSinceDate
+```js
+var successCallback = function (dataArray) {
+    // dataArray[0].from;
+    // dataArray[0].to;
+    // dataArray[0].numberOfSteps;
+    // dataArray[0].distance;
+    // dataArray[0].floorsAscended;
+    // dataArray[0].floorsDescended;
+};
+pedometer.getPedometerDataSinceDate(dateAsString, successCallback, failureCallback);
+```
+- => `dateAsString` start date using format "yyyy-MM-dd'T'HH:mm:ssZZZ", e.g. "2015-02-12T17:03:01+0100"
+
+Queries the pedometer data for each day since given date, starting at given date and ending at the current date. Returns an array of pedometer data with additional "from" and "to" date.
 
 
 ### queryActivityStartingFromDate
 ```js
 pedometer.queryActivityStartingFromDate(successCallback, failureCallback);
 ```
-Queries activites...
+Unclear functionality!
 
 ## Live pedometer data
 
@@ -74,8 +90,6 @@ pedometer.startPedometerUpdates(successHandler, onError);
 
 The success handler is executed when data is available and is called repeatedly from a background thread as new data arrives.
 
-When the app is suspended, the delivery of updates stops temporarily. Upon returning to foreground or background execution, the pedometer object begins updates again.
-
 ### stopPedometerUpdates
 
 Stops the delivery of recent pedestrian data updates to your Cordova app.
@@ -84,9 +98,12 @@ Stops the delivery of recent pedestrian data updates to your Cordova app.
 pedometer.stopPedometerUpdates(successCallback, failureCallback);
 ```
 
+## Lifecycle handling
+Right now there is only one lifecycle-event handled, which is the "didEnterBackground"-notification. So if the app enters the background the pedometer is stopped and has to be started via startPedometerUpdates again.
+
 ## Platform and device support
 
-iOS 7+ only. These capabilities are not supported on all devices, even with iOS 7, so please ensure you use the *check feature support* functions.
+iOS 8+ only. These capabilities are not supported on all devices, even with iOS 8, so please ensure you use the *check feature support* functions.
 
 ## License
 
