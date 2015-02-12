@@ -162,6 +162,9 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
     // First argument should contain date as string
     if( command.arguments == 0 ){
         //Return error.
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[NSString stringWithFormat:@"Not enough arguments. Please provide a date string using the format %@", kDateFormat]];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        return;
     }
     
     NSError *err;
