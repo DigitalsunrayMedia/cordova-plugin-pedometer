@@ -222,10 +222,7 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
         if( err ){
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[err localizedDescription]];
         } else {
-            NSDictionary* pedestrianData = @{
-                                             @"data": ret
-                                             };
-            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:pedestrianData];
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:ret];
             [pluginResult setKeepCallbackAsBool:true];
         }
         
@@ -253,7 +250,7 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
                 [array addObject: @{
                                     @"from"     : [start convertToStringUsingDateFormat:kDateFormat],
                                     @"to"       : [end convertToStringUsingDateFormat:kDateFormat],
-                                    @"steps"    : pedometerData.numberOfSteps,
+                                    @"numberOfSteps"    : pedometerData.numberOfSteps,
                                     @"distance" : pedometerData.distance,
                                     @"floorsAscended"  : pedometerData.floorsAscended,
                                     @"floorsDescended" : pedometerData.floorsDescended
