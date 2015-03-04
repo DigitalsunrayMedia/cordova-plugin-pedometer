@@ -30,6 +30,7 @@
 - (void) isStepCountingAvailable:(CDVInvokedUrlCommand*)command;
 - (void) isDistanceAvailable:(CDVInvokedUrlCommand*)command;
 - (void) isFloorCountingAvailable:(CDVInvokedUrlCommand*)command;
+- (void) isActivityTrackingAvailable:(CDVInvokedUrlCommand*)command;
 
 - (void) startPedometerUpdates:(CDVInvokedUrlCommand*)command;
 - (void) stopPedometerUpdates:(CDVInvokedUrlCommand*)command;
@@ -37,5 +38,7 @@
 - (void) getPedometerDataAll:(CDVInvokedUrlCommand*)command;
 - (void) getPedometerDataSinceDate:(CDVInvokedUrlCommand*)command;
 
+- (void) startActivityUpdates:(CDVInvokedUrlCommand*)command;
+- (void) stopActivityUpdates:(CDVInvokedUrlCommand*)command;
 
 @end

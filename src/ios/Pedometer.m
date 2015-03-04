@@ -39,10 +39,14 @@
 
 @interface Pedometer ()
 
+// Step counting iOS 7 and iOS 8+
 @property (nonatomic, strong) CMStepCounter *stepCounter;
 @property (nonatomic, strong) CMPedometer *pedometer;
 @property (nonatomic, strong) NSOperationQueue *stepQueue;
-
+@property (nonatomic, strong) NSNumber *currentStepCount;
+// Activity Tracking
+@property (nonatomic, strong) CMMotionActivityManager *motionActivityManager;
+@property (nonatomic, strong) NSOperationQueue *activityQueue;
 @end
 
 @implementation Pedometer
@@ -65,6 +69,8 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
                                    name:UIApplicationDidEnterBackgroundNotification
                                  object:nil];
 
+        self.currentStepCount = 0;
+        
         if( [CMPedometer class] ){
             self.pedometer = [[CMPedometer alloc] init];
         }else{
@@ -73,7 +79,10 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
             self.stepQueue = [[NSOperationQueue alloc] init];
             self.stepQueue.maxConcurrentOperationCount = 1;
         }
-
+        
+        self.motionActivityManager = [[CMMotionActivityManager alloc] init];
+        self.activityQueue = [[NSOperationQueue alloc] init];
+        self.activityQueue.maxConcurrentOperationCount = 1;
     }
     return self;
 }
@@ -87,8 +96,7 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
 }
 
 - (void)didEnterBackground:(NSNotification *)notification{
-    [self.pedometer stopPedometerUpdates];
-    [self.stepCounter stopStepCountingUpdates];
+
 }
 
 - (void)dealloc{
@@ -113,17 +121,26 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void)isActivityTrackingAvailable:(CDVInvokedUrlCommand *)command{
+    BOOL available = [CMMotionActivityManager isActivityAvailable];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:(available ? CDVCommandStatus_OK : CDVCommandStatus_ERROR) messageAsBool:available];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
 - (void)startPedometerUpdates:(CDVInvokedUrlCommand*)command{
     __block CDVPluginResult* pluginResult = nil;
-
+    self.currentStepCount = 0;
+    
     if( self.pedometer ){
         [self.pedometer startPedometerUpdatesFromDate:[NSDate date] withHandler:^(CMPedometerData *pedometerData, NSError *error) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if( error ){
                     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]];
                 } else {
+                    NSInteger stepsTaken = pedometerData.numberOfSteps.integerValue - self.currentStepCount.integerValue;
+                    self.currentStepCount = @(self.currentStepCount.integerValue + stepsTaken);
                     NSDictionary* pedestrianData = @{
-                                                     @"numberOfSteps": pedometerData.numberOfSteps,
+                                                     @"numberOfSteps": @(stepsTaken),
                                                      @"distance": pedometerData.distance,
                                                      @"floorsAscended": pedometerData.floorsAscended,
                                                      @"floorsDescended": pedometerData.floorsDescended
@@ -141,8 +158,10 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
                 if( error ){
                     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]];
                 } else {
+                    NSInteger stepsTaken = numberOfSteps - self.currentStepCount.integerValue;
+                    self.currentStepCount = @(self.currentStepCount.integerValue + stepsTaken);
                     NSDictionary* pedestrianData = @{
-                                                     @"numberOfSteps": @(numberOfSteps),
+                                                     @"numberOfSteps": @(stepsTaken),
                                                      @"distance": @(-1),
                                                      @"floorsAscended": @(-1),
                                                      @"floorsDescended": @(-1)
@@ -295,6 +314,36 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
         }];
     }
     
+}
+
+- (void)startActivityUpdates:(CDVInvokedUrlCommand *)command{
+    __block CDVPluginResult* pluginResult = nil;
+    
+    [self.motionActivityManager startActivityUpdatesToQueue:self.activityQueue withHandler:^(CMMotionActivity *activity) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            NSDictionary* pedestrianData = @{
+                                             @"unknown": @(activity.unknown),
+                                             @"walking": @(activity.walking),
+                                             @"running": @(activity.running),
+                                             @"stationary": @(activity.stationary),
+                                             @"automotive": @(activity.automotive),
+                                             @"confidence": @(activity.confidence)
+                                             };
+
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:pedestrianData];
+            [pluginResult setKeepCallbackAsBool:true];
+            
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        });
+    }];
+}
+
+- (void)stopActivityUpdates:(CDVInvokedUrlCommand*)command{
+    [self.motionActivityManager stopActivityUpdates];
+    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 @end
