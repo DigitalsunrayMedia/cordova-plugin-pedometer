@@ -1,4 +1,4 @@
-###### Version 0.1.3 - Fork by danurna based on Bourne Liu's version
+###### Version 0.1.4 - Fork by danurna based on Bourne Liu's version
 
 ## Core Motion Pedometer Plugin for Apache Cordova
 
@@ -36,6 +36,14 @@ pedometer.isFloorCountingAvailable(successCallback, failureCallback);
 Floor counting indicates the ability to count the number of floors the user walks up or down using stairs.
 
 This capability is not supported on all devices, even with iOS 8.
+
+### isActivityTrackingAvailable
+```js
+pedometer.isActivityTrackingAvailable(successCallback, failureCallback);
+```
+
+Check for availability of activity tracking provided by CMMotionActivityManager class.
+
 
 ## Pedometer data
 ### getPedometerDataAll
@@ -83,8 +91,29 @@ Stops the delivery of recent pedestrian data updates to your Cordova app.
 pedometer.stopPedometerUpdates(successCallback, failureCallback);
 ```
 
+## Live activity data
+### startActivityUpdates
+Starts the delivery of activity changes to your Cordova app.
+```js
+var successHandler = function (activityData) {
+    // activityData.walking; (BOOL)
+    // activityData.running; (BOOL)
+    // activityData.stationary; (BOOL)
+    // activityData.automotive; (BOOL)
+    // activityData.unknown; (BOOL)
+    // activityData.confidence; (ENUM: 0 = low, 1 = medium, 2 = high)
+    // Note: cycling is data currently not available.
+};
+pedometer.startActivityUpdates(successHandler, onError);
+```
+### stopActivityUpdates
+Stops the delivery of activitychanges to your Cordova app.
+
+```js
+pedometer.stopActivityUpdates(successCallback, failureCallback);
+```
 ## Lifecycle handling
-Right now there is only one lifecycle-event handled, which is the "didEnterBackground"-notification. So if the app enters the background the pedometer is stopped and has to be started via startPedometerUpdates again.
+Lifecycle events, like didEnterBackground, aren't handled by the plugin. Use the events provided by cordova to stop and start updates.
 
 ## Platform and device support
 iOS 7 and newer only. The capabilities are not supported on all devices, even with iOS 8, so please ensure you use the *check feature support* functions.
