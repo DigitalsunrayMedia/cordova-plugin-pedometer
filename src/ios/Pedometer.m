@@ -26,6 +26,7 @@
 #import "Cordova/CDVViewController.h"
 #import "CoreMotion/CoreMotion.h"
 #import "Pedometer.h"
+#import "SOMotionDetector.h""
 
 @interface NSDate (PedometerUtils)
 
@@ -122,7 +123,9 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
 }
 
 - (void)isActivityTrackingAvailable:(CDVInvokedUrlCommand *)command{
-    BOOL available = [CMMotionActivityManager isActivityAvailable];
+    // For each device available as we are falling back to GPS and accelerometer,
+    // if there is no dedicated motion chip
+    BOOL available = true;
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:(available ? CDVCommandStatus_OK : CDVCommandStatus_ERROR) messageAsBool:available];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
@@ -318,29 +321,32 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
 
 - (void)startActivityUpdates:(CDVInvokedUrlCommand *)command{
     __block CDVPluginResult* pluginResult = nil;
+    [SOMotionDetector sharedInstance].useM7IfAvailable = YES;
     
-    [self.motionActivityManager startActivityUpdatesToQueue:self.activityQueue withHandler:^(CMMotionActivity *activity) {
+    [SOMotionDetector sharedInstance].motionTypeChangedBlock = ^(SOMotionType motionType) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            
-            NSDictionary* pedestrianData = @{
-                                             @"unknown": @(activity.unknown),
-                                             @"walking": @(activity.walking),
-                                             @"running": @(activity.running),
-                                             @"stationary": @(activity.stationary),
-                                             @"automotive": @(activity.automotive),
-                                             @"confidence": @(activity.confidence)
-                                             };
 
+            NSDictionary* pedestrianData = @{
+                                             @"unknown": @(NO),
+                                             @"walking": @(motionType == MotionTypeWalking),
+                                             @"running": @(motionType == MotionTypeRunning),
+                                             @"stationary": @(motionType ==MotionTypeNotMoving),
+                                             @"automotive": @(motionType == MotionTypeAutomotive),
+                                             @"confidence": @(0)
+                                             };
+            
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:pedestrianData];
             [pluginResult setKeepCallbackAsBool:true];
             
             [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         });
-    }];
+    };
+    
+    [[SOMotionDetector sharedInstance] startDetection];
 }
 
 - (void)stopActivityUpdates:(CDVInvokedUrlCommand*)command{
-    [self.motionActivityManager stopActivityUpdates];
+    [[SOMotionDetector sharedInstance] stopDetection];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
