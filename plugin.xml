@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="uk.co.ilee.pedometer" version="0.1.4">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="uk.co.ilee.pedometer" version="0.1.5">
     <name>Core Motion Pedometer</name>
-    <author>Lee Crossley (http://ilee.co.uk/), Bourne Liu, Daniel Witurna</author>
+    <author>Lee Crossley (http://ilee.co.uk/), Bourne Liu, Daniel Witurna, Cem Yesil</author>
     <description>Cordova / PhoneGap Plugin for the Core Motion Pedometer to fetch pedestrian-related data,
         such as step counts and other information about the distance travelled.</description>
     <keywords>cordova, core motion, pedometer, steps, distance, pedestrian, activity</keywords>
