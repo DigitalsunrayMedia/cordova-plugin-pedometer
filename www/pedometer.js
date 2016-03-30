@@ -37,6 +37,10 @@ Pedometer.prototype.stopActivityUpdates = function (onSuccess, onError) {
     exec(onSuccess, onError, "Pedometer", "stopActivityUpdates", []);
 };
 
+Pedometer.prototype.getPedometerDataSinceDate = function (dateAsString, onSuccess, onError) {
+    exec(onSuccess, onError, "Pedometer", "getPedometerDataSinceDate", [dateAsString]);
+};
+
 module.exports = new Pedometer();
 
 });

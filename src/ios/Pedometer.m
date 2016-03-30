@@ -4,7 +4,7 @@
 //  The MIT License (MIT)
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
-//  of this software and associated documentation files (the “Software”), to deal
+//  of this software and associated documentation files (the â€œSoftwareâ€), to deal
 //  in the Software without restriction, including without limitation the rights
 //  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 //  copies of the Software, and to permit persons to whom the Software is
@@ -13,7 +13,7 @@
 //  The above copyright notice and this permission notice shall be included in
 //  all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  THE SOFTWARE IS PROVIDED â€œAS ISâ€, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 //  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 //  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 //  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -26,6 +26,7 @@
 #import "Cordova/CDVViewController.h"
 #import "CoreMotion/CoreMotion.h"
 #import "Pedometer.h"
+#import "SOMotionDetector.h""
 
 @interface NSDate (PedometerUtils)
 
@@ -57,7 +58,7 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
     self = [super initWithWebView:theWebView];
     if( self ){
         NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
-
+        
         // subscribe to relevant notifications
         [notificationCenter addObserver:self selector:@selector(timeChangedSignificantly:)
                                    name:UIApplicationSignificantTimeChangeNotification
@@ -68,7 +69,7 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
         [notificationCenter addObserver:self selector:@selector(didEnterBackground:)
                                    name:UIApplicationDidEnterBackgroundNotification
                                  object:nil];
-
+        
         self.currentStepCount = 0;
         
         if( [CMPedometer class] ){
@@ -96,11 +97,11 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
 }
 
 - (void)didEnterBackground:(NSNotification *)notification{
-
+    
 }
 
 - (void)dealloc{
-   [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)isStepCountingAvailable:(CDVInvokedUrlCommand*)command{
@@ -122,7 +123,9 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
 }
 
 - (void)isActivityTrackingAvailable:(CDVInvokedUrlCommand *)command{
-    BOOL available = [CMMotionActivityManager isActivityAvailable];
+    // For each device available as we are falling back to GPS and accelerometer,
+    // if there is no dedicated motion chip
+    BOOL available = true;
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:(available ? CDVCommandStatus_OK : CDVCommandStatus_ERROR) messageAsBool:available];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
@@ -137,14 +140,55 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
                 if( error ){
                     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]];
                 } else {
-                    NSInteger stepsTaken = pedometerData.numberOfSteps.integerValue - self.currentStepCount.integerValue;
-                    self.currentStepCount = @(self.currentStepCount.integerValue + stepsTaken);
-                    NSDictionary* pedestrianData = @{
+                    
+                    NSInteger stepsTaken, distance, floorsAscended, floorsDescended;
+                    
+                    if (!pedometerData.numberOfSteps)
+                    {
+                        stepsTaken = -1;
+                    }
+                    else
+                    {
+                        stepsTaken = pedometerData.numberOfSteps.integerValue - self.currentStepCount.integerValue;
+                        self.currentStepCount = @(self.currentStepCount.integerValue + stepsTaken);
+                    }
+                    
+                    if (!pedometerData.distance)
+                    {
+                        distance = -1;
+                    }
+                    else
+                    {
+                        distance = [pedometerData.distance integerValue];
+                    }
+                    
+                    if (!pedometerData.floorsAscended)
+                    {
+                        floorsAscended = -1;
+                    }
+                    else
+                    {
+                        floorsAscended = [pedometerData.floorsAscended integerValue];
+                    }
+                    
+                    if (!pedometerData.floorsDescended)
+                    {
+                        floorsDescended = -1;
+                    }
+                    else
+                    {
+                        floorsDescended = [pedometerData.floorsDescended integerValue];
+                    }
+                    
+                    
+                    
+                    NSDictionary *pedestrianData = @{
                                                      @"numberOfSteps": @(stepsTaken),
-                                                     @"distance": pedometerData.distance,
-                                                     @"floorsAscended": pedometerData.floorsAscended,
-                                                     @"floorsDescended": pedometerData.floorsDescended
+                                                     @"distance": @(distance),
+                                                     @"floorsAscended": @(floorsAscended),
+                                                     @"floorsDescended": @(floorsDescended)
                                                      };
+                    
                     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:pedestrianData];
                     [pluginResult setKeepCallbackAsBool:true];
                 }
@@ -268,10 +312,10 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
 }
 
 - (void)addPedestrianDataToArray:(NSMutableArray *)array
-                   from:(NSDate *)start
-                     to:(NSDate *)end
-            insideGroup:(dispatch_group_t)group
-               andError:(NSError **)err{
+                            from:(NSDate *)start
+                              to:(NSDate *)end
+                     insideGroup:(dispatch_group_t)group
+                        andError:(NSError **)err{
     dispatch_group_enter(group);
     
     // CMPedometer available and initalized? (iOS8+)
@@ -318,29 +362,32 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
 
 - (void)startActivityUpdates:(CDVInvokedUrlCommand *)command{
     __block CDVPluginResult* pluginResult = nil;
+    [SOMotionDetector sharedInstance].useM7IfAvailable = YES;
     
-    [self.motionActivityManager startActivityUpdatesToQueue:self.activityQueue withHandler:^(CMMotionActivity *activity) {
+    [SOMotionDetector sharedInstance].motionTypeChangedBlock = ^(SOMotionType motionType) {
         dispatch_async(dispatch_get_main_queue(), ^{
             
             NSDictionary* pedestrianData = @{
-                                             @"unknown": @(activity.unknown),
-                                             @"walking": @(activity.walking),
-                                             @"running": @(activity.running),
-                                             @"stationary": @(activity.stationary),
-                                             @"automotive": @(activity.automotive),
-                                             @"confidence": @(activity.confidence)
+                                             @"unknown": @(NO),
+                                             @"walking": @(motionType == MotionTypeWalking),
+                                             @"running": @(motionType == MotionTypeRunning),
+                                             @"stationary": @(motionType ==MotionTypeNotMoving),
+                                             @"automotive": @(motionType == MotionTypeAutomotive),
+                                             @"confidence": @(0)
                                              };
-
+            
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:pedestrianData];
             [pluginResult setKeepCallbackAsBool:true];
             
             [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         });
-    }];
+    };
+    
+    [[SOMotionDetector sharedInstance] startDetection];
 }
 
 - (void)stopActivityUpdates:(CDVInvokedUrlCommand*)command{
-    [self.motionActivityManager stopActivityUpdates];
+    [[SOMotionDetector sharedInstance] stopDetection];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
