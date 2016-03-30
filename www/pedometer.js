@@ -1,4 +1,3 @@
-cordova.define("com.digitalsunray.pedometer.Pedometer", function(require, exports, module) { 
 var exec = require("cordova/exec");
 
 var Pedometer = function () {
@@ -42,5 +41,3 @@ Pedometer.prototype.getPedometerDataSinceDate = function (dateAsString, onSucces
 };
 
 module.exports = new Pedometer();
-
-});
