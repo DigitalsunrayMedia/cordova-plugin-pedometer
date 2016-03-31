@@ -26,7 +26,7 @@
 #import "Cordova/CDVViewController.h"
 #import "CoreMotion/CoreMotion.h"
 #import "Pedometer.h"
-#import "SOMotionDetector.h""
+#import "SOMotionDetector.h"
 
 @interface NSDate (PedometerUtils)
 
@@ -141,52 +141,12 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
                     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]];
                 } else {
                     
-                    NSInteger stepsTaken, distance, floorsAscended, floorsDescended;
-                    
-                    if (!pedometerData.numberOfSteps)
-                    {
-                        stepsTaken = -1;
-                    }
-                    else
-                    {
-                        stepsTaken = pedometerData.numberOfSteps.integerValue - self.currentStepCount.integerValue;
-                        self.currentStepCount = @(self.currentStepCount.integerValue + stepsTaken);
-                    }
-                    
-                    if (!pedometerData.distance)
-                    {
-                        distance = -1;
-                    }
-                    else
-                    {
-                        distance = [pedometerData.distance integerValue];
-                    }
-                    
-                    if (!pedometerData.floorsAscended)
-                    {
-                        floorsAscended = -1;
-                    }
-                    else
-                    {
-                        floorsAscended = [pedometerData.floorsAscended integerValue];
-                    }
-                    
-                    if (!pedometerData.floorsDescended)
-                    {
-                        floorsDescended = -1;
-                    }
-                    else
-                    {
-                        floorsDescended = [pedometerData.floorsDescended integerValue];
-                    }
-                    
-                    
-                    
+                    NSDictionary *dic = [self getStepDictonaryFromStepData:pedometerData and: true];
                     NSDictionary *pedestrianData = @{
-                                                     @"numberOfSteps": @(stepsTaken),
-                                                     @"distance": @(distance),
-                                                     @"floorsAscended": @(floorsAscended),
-                                                     @"floorsDescended": @(floorsDescended)
+                                                     @"numberOfSteps": dic[@"stepsTaken"],
+                                                     @"distance": dic[@"distance"],
+                                                     @"floorsAscended": dic[@"floorsAscended"],
+                                                     @"floorsDescended": dic[@"floorsDescended"]
                                                      };
                     
                     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:pedestrianData];
@@ -327,13 +287,14 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
                     NSLog(@"ERROR %@", error);
                     //TODO: Updated non-local err variable.
                 } else {
+                    NSDictionary* dic = [self getStepDictonaryFromStepData:pedometerData and: false];
                     [array addObject: @{
                                         @"from"     : [start convertToStringUsingDateFormat:kDateFormat],
                                         @"to"       : [end convertToStringUsingDateFormat:kDateFormat],
-                                        @"numberOfSteps"    : pedometerData.numberOfSteps,
-                                        @"distance" : pedometerData.distance,
-                                        @"floorsAscended"  : pedometerData.floorsAscended,
-                                        @"floorsDescended" : pedometerData.floorsDescended
+                                        @"numberOfSteps"    : dic[@"numberOfSteps"],
+                                        @"distance" : dic[@"distance"],
+                                        @"floorsAscended"  : dic[@"floorsAscended"],
+                                        @"floorsDescended" : dic[@"floorsDescended"]
                                         }];
                 }
                 dispatch_group_leave(group);
@@ -391,6 +352,48 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (NSDictionary *)getStepDictonaryFromStepData: (CMPedometerData *)pedometerData and: (BOOL)increaseStepCount {
+    
+    NSInteger stepsTaken, distance, floorsAscended, floorsDescended;
+    
+    if (!pedometerData.numberOfSteps) {
+        stepsTaken = -1;
+    } else {
+        stepsTaken = pedometerData.numberOfSteps.integerValue - self.currentStepCount.integerValue;
+        if(increaseStepCount) {
+            self.currentStepCount = @(self.currentStepCount.integerValue + stepsTaken);
+        }
+    }
+    
+    if (!pedometerData.distance) {
+        distance = -1;
+    } else {
+        distance = [pedometerData.distance integerValue];
+    }
+    
+    if (!pedometerData.floorsAscended) {
+        floorsAscended = -1;
+    } else {
+        floorsAscended = [pedometerData.floorsAscended integerValue];
+    }
+    
+    if (!pedometerData.floorsDescended) {
+        floorsDescended = -1;
+    } else {
+        floorsDescended = [pedometerData.floorsDescended integerValue];
+    }
+    
+    NSDictionary *pedestrianData = @{
+        @"numberOfSteps": @(stepsTaken),
+        @"distance": @(distance),
+        @"floorsAscended": @(floorsAscended),
+        @"floorsDescended": @(floorsDescended)
+    };
+    
+    return pedestrianData;
+
 }
 
 @end

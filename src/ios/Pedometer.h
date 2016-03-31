@@ -41,4 +41,7 @@
 - (void) startActivityUpdates:(CDVInvokedUrlCommand*)command;
 - (void) stopActivityUpdates:(CDVInvokedUrlCommand*)command;
 
+- (NSDictionary*) getStepDictonaryFromStepData:(CMPedometerData*)pedometerData;
+
 @end
+
