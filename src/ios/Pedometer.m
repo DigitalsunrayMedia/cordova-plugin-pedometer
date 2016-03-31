@@ -143,7 +143,7 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
                     
                     NSDictionary *dic = [self getStepDictonaryFromStepData:pedometerData and: true];
                     NSDictionary *pedestrianData = @{
-                                                     @"numberOfSteps": dic[@"stepsTaken"],
+                                                     @"numberOfSteps": dic[@"numberOfSteps"],
                                                      @"distance": dic[@"distance"],
                                                      @"floorsAscended": dic[@"floorsAscended"],
                                                      @"floorsDescended": dic[@"floorsDescended"]
