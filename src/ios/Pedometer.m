@@ -54,8 +54,7 @@
 
 NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
 
-- (CDVPlugin *)initWithWebView:(UIWebView *)theWebView{
-    self = [super initWithWebView:theWebView];
+- (void)pluginInitialize {
     if( self ){
         NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
         
@@ -85,7 +84,6 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
         self.activityQueue = [[NSOperationQueue alloc] init];
         self.activityQueue.maxConcurrentOperationCount = 1;
     }
-    return self;
 }
 
 - (void)timeChangedSignificantly:(NSNotification *)notification{
@@ -106,19 +104,22 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
 
 - (void)isStepCountingAvailable:(CDVInvokedUrlCommand*)command{
     BOOL available = [CMPedometer class] ? [CMPedometer isStepCountingAvailable] : [CMStepCounter isStepCountingAvailable];
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:(available ? CDVCommandStatus_OK : CDVCommandStatus_ERROR) messageAsBool:available];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:(available ? CDVCommandStatus_OK : 
+CDVCommandStatus_ERROR) messageAsBool:available];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)isDistanceAvailable:(CDVInvokedUrlCommand*)command{
     BOOL available = [CMPedometer class] ? [CMPedometer isDistanceAvailable] : NO;
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:(available ? CDVCommandStatus_OK : CDVCommandStatus_ERROR) messageAsBool:available];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:(available ? CDVCommandStatus_OK : 
+CDVCommandStatus_ERROR) messageAsBool:available];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)isFloorCountingAvailable:(CDVInvokedUrlCommand*)command{
     BOOL available = [CMPedometer class] ? [CMPedometer isFloorCountingAvailable] : NO;
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:(available ? CDVCommandStatus_OK : CDVCommandStatus_ERROR) messageAsBool:available];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:(available ? CDVCommandStatus_OK : 
+CDVCommandStatus_ERROR) messageAsBool:available];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
@@ -126,7 +127,8 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
     // For each device available as we are falling back to GPS and accelerometer,
     // if there is no dedicated motion chip
     BOOL available = true;
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:(available ? CDVCommandStatus_OK : CDVCommandStatus_ERROR) messageAsBool:available];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:(available ? CDVCommandStatus_OK : 
+CDVCommandStatus_ERROR) messageAsBool:available];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
@@ -135,10 +137,12 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
     self.currentStepCount = 0;
     
     if( self.pedometer ){
-        [self.pedometer startPedometerUpdatesFromDate:[NSDate date] withHandler:^(CMPedometerData *pedometerData, NSError *error) {
+        [self.pedometer startPedometerUpdatesFromDate:[NSDate date] withHandler:^(CMPedometerData *pedometerData, NSError 
+*error) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if( error ){
-                    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]];
+                    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error 
+localizedDescription]];
                 } else {
                     
                     NSDictionary *dic = [self getStepDictonaryFromStepData:pedometerData and: true];
@@ -149,7 +153,8 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
                                                      @"floorsDescended": dic[@"floorsDescended"]
                                                      };
                     
-                    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:pedestrianData];
+                    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK 
+messageAsDictionary:pedestrianData];
                     [pluginResult setKeepCallbackAsBool:true];
                 }
                 
@@ -157,10 +162,12 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
             });
         }];
     }else{
-        [self.stepCounter startStepCountingUpdatesToQueue:self.stepQueue updateOn:1 withHandler:^(NSInteger numberOfSteps, NSDate *timestamp, NSError *error) {
+        [self.stepCounter startStepCountingUpdatesToQueue:self.stepQueue updateOn:1 withHandler:^(NSInteger numberOfSteps, 
+NSDate *timestamp, NSError *error) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if( error ){
-                    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]];
+                    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error 
+localizedDescription]];
                 } else {
                     NSInteger stepsTaken = numberOfSteps - self.currentStepCount.integerValue;
                     self.currentStepCount = @(self.currentStepCount.integerValue + stepsTaken);
@@ -170,7 +177,8 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
                                                      @"floorsAscended": @(-1),
                                                      @"floorsDescended": @(-1)
                                                      };
-                    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:pedestrianData];
+                    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK 
+messageAsDictionary:pedestrianData];
                     [pluginResult setKeepCallbackAsBool:true];
                 }
                 
@@ -192,7 +200,8 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
 - (void)getPedometerDataAll:(CDVInvokedUrlCommand*)command{
     NSDate *beginningOfDay = [[NSDate date] dateBySettingDaytimeToMidnight];
     NSString *startArgument = [beginningOfDay convertToStringUsingDateFormat:kDateFormat];
-    CDVInvokedUrlCommand *cmd = [[CDVInvokedUrlCommand alloc] initWithArguments:@[ startArgument ] callbackId:command.callbackId className:command.className methodName:command.methodName];
+    CDVInvokedUrlCommand *cmd = [[CDVInvokedUrlCommand alloc] initWithArguments:@[ startArgument ] 
+callbackId:command.callbackId className:command.className methodName:command.methodName];
     [self getPedometerDataSinceDate:cmd];
 }
 
@@ -200,7 +209,8 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
     // First argument should contain date as string
     if( command.arguments == 0 ){
         //Return error.
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[NSString stringWithFormat:@"Not enough arguments. Please provide a date string using the format %@", kDateFormat]];
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[NSString 
+stringWithFormat:@"Not enough arguments. Please provide a date string using the format %@", kDateFormat]];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         return;
     }
@@ -261,7 +271,8 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
         CDVPluginResult *pluginResult;
         
         if( err ){
-            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[err localizedDescription]];
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[err 
+localizedDescription]];
         } else {
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:ret];
             [pluginResult setKeepCallbackAsBool:true];
@@ -280,7 +291,8 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
     
     // CMPedometer available and initalized? (iOS8+)
     if( self.pedometer ){
-        [self.pedometer queryPedometerDataFromDate:start toDate:end withHandler:^(CMPedometerData *pedometerData, NSError *error) {
+        [self.pedometer queryPedometerDataFromDate:start toDate:end withHandler:^(CMPedometerData *pedometerData, NSError 
+*error) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 
                 if( error ){
@@ -301,7 +313,8 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
             });
         }];
     }else{ // Use CMStepCounter (iOS7+)
-        [self.stepCounter queryStepCountStartingFrom:start to:end toQueue:self.stepQueue withHandler:^(NSInteger numberOfSteps, NSError *error) {
+        [self.stepCounter queryStepCountStartingFrom:start to:end toQueue:self.stepQueue withHandler:^(NSInteger 
+numberOfSteps, NSError *error) {
             if( error ){
                 NSLog(@"ERROR %@", error);
                 //TODO: Updated non-local err variable.
@@ -422,7 +435,8 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
 
 - (NSDate *)dateBySettingDaytimeToMidnight{
     NSCalendar *theCalendar = [NSCalendar currentCalendar];
-    NSDateComponents *dateWithoutTimeComponent = [theCalendar components:(NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit) fromDate:self];
+    NSDateComponents *dateWithoutTimeComponent = [theCalendar components:(NSYearCalendarUnit | NSMonthCalendarUnit | 
+NSDayCalendarUnit) fromDate:self];
     return [theCalendar dateFromComponents:dateWithoutTimeComponent];
 }
 
@@ -435,3 +449,4 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
 }
 
 @end
+
