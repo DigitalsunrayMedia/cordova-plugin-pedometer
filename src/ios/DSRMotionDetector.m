@@ -24,19 +24,19 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
 
-#import "SOMotionDetector.h"
+#import "DSRMotionDetector.h"
 
 CGFloat kMinimumSpeed        = 0.3f;
 CGFloat kMaximumWalkingSpeed = 1.9f;
 CGFloat kMaximumRunningSpeed = 7.5f;
 CGFloat kMinimumRunningAcceleration = 3.5f;
 
-@interface SOMotionDetector()
+@interface DSRMotionDetector()
 
 @property (strong, nonatomic) NSTimer *shakeDetectingTimer;
 
 @property (strong, nonatomic) CLLocation *currentLocation;
-@property (nonatomic) SOMotionType previousMotionType;
+@property (nonatomic) DSRMotionType previousMotionType;
 
 #pragma mark - Accelerometer manager
 @property (strong, nonatomic) CMMotionManager *motionManager;
@@ -45,11 +45,11 @@ CGFloat kMinimumRunningAcceleration = 3.5f;
 
 @end
 
-@implementation SOMotionDetector
+@implementation DSRMotionDetector
 
-+ (SOMotionDetector *)sharedInstance
++ (DSRMotionDetector *)sharedInstance
 {
-    static SOMotionDetector *instance = nil;
+    static DSRMotionDetector *instance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         instance = [[self alloc] init];
@@ -86,7 +86,7 @@ CGFloat kMinimumRunningAcceleration = 3.5f;
 #pragma mark - Public Methods
 - (void)startDetection
 {
-    [[SOLocationManager sharedInstance] start];
+    [[DSRLocationManager sharedInstance] start];
     
     self.shakeDetectingTimer = [NSTimer scheduledTimerWithTimeInterval:0.01f
                                                                 target:self
@@ -114,7 +114,7 @@ CGFloat kMinimumRunningAcceleration = 3.5f;
          });
      }];
     
-    if (self.useM7IfAvailable && [SOMotionDetector motionHardwareAvailable]) {
+    if (self.useM7IfAvailable && [DSRMotionDetector motionHardwareAvailable]) {
         if (!self.motionActivityManager) {
             self.motionActivityManager = [[CMMotionActivityManager alloc] init];
         }
@@ -157,7 +157,7 @@ CGFloat kMinimumRunningAcceleration = 3.5f;
     [self.shakeDetectingTimer invalidate];
     self.shakeDetectingTimer = nil;
     
-    [[SOLocationManager sharedInstance] stop];
+    [[DSRLocationManager sharedInstance] stop];
     [self.motionManager stopAccelerometerUpdates];
     [self.motionActivityManager stopActivityUpdates];
 }
@@ -185,7 +185,7 @@ CGFloat kMinimumRunningAcceleration = 3.5f;
 #pragma mark - Private Methods
 - (void)calculateMotionType
 {
-    if (self.useM7IfAvailable && [SOMotionDetector motionHardwareAvailable]) {
+    if (self.useM7IfAvailable && [DSRMotionDetector motionHardwareAvailable]) {
         return;
     }
     
@@ -266,7 +266,7 @@ CGFloat kMinimumRunningAcceleration = 3.5f;
 #pragma mark - LocationManager notification handler
 - (void)handleLocationChangedNotification:(NSNotification *)note
 {
-    self.currentLocation = [SOLocationManager sharedInstance].lastLocation;
+    self.currentLocation = [DSRLocationManager sharedInstance].lastLocation;
     _currentSpeed = self.currentLocation.speed;
     if (_currentSpeed < 0) {
         _currentSpeed = 0;

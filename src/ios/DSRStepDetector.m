@@ -1,24 +1,24 @@
 
 //
-//  SOStepDetector.m
+//  DSRStepDetector.m
 //  MotionDetection
 //
 //  Created by Artur on 5/15/15.
 //  Copyright (c) 2015 Artur Mkrtchyan. All rights reserved.
 //
 
-#import "SOStepDetector.h"
+#import "DSRStepDetector.h"
 #import <CoreMotion/CoreMotion.h>
 
 #define kUpdateInterval 0.2f
-@interface SOStepDetector()
+@interface DSRStepDetector()
 
 @property (strong, nonatomic) CMMotionManager *motionManager;
 @property (strong, nonatomic) NSOperationQueue* queue;
 
 @end
 
-@implementation SOStepDetector
+@implementation DSRStepDetector
 
 + (instancetype)sharedInstance
 {

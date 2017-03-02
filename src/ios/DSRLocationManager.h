@@ -1,5 +1,5 @@
 //
-//  SOMotionDetecter.h
+//  DSRMotionDetecter.h
 //  MotionDetection
 //
 // The MIT License (MIT)
@@ -37,9 +37,9 @@ typedef enum
     LocationManagerTypeStandart = 0x10,
     LocationManagerTypeSignificant = 0x01,
     LocationManagetTypeStandartAndSignificant = 0x11
-} SOLocationManagerType;
+} DSRLocationManagerType;
 
-@interface SOLocationManager : NSObject <CLLocationManagerDelegate>
+@interface DSRLocationManager : NSObject <CLLocationManagerDelegate>
 
 @property (strong, nonatomic) CLLocationManager *locationManager;
 @property (strong, nonatomic) CLLocationManager *significantLocationManager;
@@ -49,12 +49,12 @@ typedef enum
 
 @property (nonatomic) BOOL allowsBackgroundLocationUpdates;
 
-+ (SOLocationManager *)sharedInstance;
++ (DSRLocationManager *)sharedInstance;
 
 /**
  *  Indicates in whether of LocationManagetType state is now the location manager's shared instance.
  */
-@property (nonatomic) SOLocationManagerType locationType;
+@property (nonatomic) DSRLocationManagerType locationType;
 
 /**
  * Start Location Update

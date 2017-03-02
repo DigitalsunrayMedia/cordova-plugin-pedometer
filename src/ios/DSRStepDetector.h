@@ -1,5 +1,5 @@
 //
-//  SOMotionDetecter.h
+//  DSRMotionDetecter.h
 //  MotionDetection
 //
 // The MIT License (MIT)
@@ -26,7 +26,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface SOStepDetector : NSObject
+@interface DSRStepDetector : NSObject
 
 + (instancetype)sharedInstance;
 

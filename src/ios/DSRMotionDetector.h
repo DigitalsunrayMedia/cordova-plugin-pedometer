@@ -1,5 +1,5 @@
 //
-//  SOMotionDetecter.h
+//  DSRMotionDetecter.h
 //  MotionDetection
 //
 // The MIT License (MIT)
@@ -25,40 +25,40 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
 
 #import <Foundation/Foundation.h>
-#import "SOLocationManager.h"
+#import "DSRLocationManager.h"
 #import <CoreMotion/CoreMotion.h>
 
-@class SOMotionDetector;
+@class DSRMotionDetector;
 typedef enum
 {
   MotionTypeNotMoving = 1,
   MotionTypeWalking,
   MotionTypeRunning,
   MotionTypeAutomotive
-} SOMotionType;
+} DSRMotionType;
 
-@protocol SOMotionDetectorDelegate <NSObject>
+@protocol DSRMotionDetectorDelegate <NSObject>
 
 @optional
-- (void)motionDetector:(SOMotionDetector *)motionDetector motionTypeChanged:(SOMotionType)motionType;
-- (void)motionDetector:(SOMotionDetector *)motionDetector locationChanged:(CLLocation *)location;
-- (void)motionDetector:(SOMotionDetector *)motionDetector accelerationChanged:(CMAcceleration)acceleration;
+- (void)motionDetector:(DSRMotionDetector *)motionDetector motionTypeChanged:(DSRMotionType)motionType;
+- (void)motionDetector:(DSRMotionDetector *)motionDetector locationChanged:(CLLocation *)location;
+- (void)motionDetector:(DSRMotionDetector *)motionDetector accelerationChanged:(CMAcceleration)acceleration;
 
 @end
 
-@interface SOMotionDetector : NSObject
+@interface DSRMotionDetector : NSObject
 
 #pragma mark - Singleton
-+ (SOMotionDetector *)sharedInstance;
++ (DSRMotionDetector *)sharedInstance;
 
 #pragma mark - Properties
-@property (weak, nonatomic) id<SOMotionDetectorDelegate> delegate DEPRECATED_MSG_ATTRIBUTE(" Use blocks instead");
+@property (weak, nonatomic) id<DSRMotionDetectorDelegate> delegate DEPRECATED_MSG_ATTRIBUTE(" Use blocks instead");
 
-@property (copy) void (^motionTypeChangedBlock) (SOMotionType motionType);
+@property (copy) void (^motionTypeChangedBlock) (DSRMotionType motionType);
 @property (copy) void (^locationChangedBlock) (CLLocation *location);
 @property (copy) void (^accelerationChangedBlock) (CMAcceleration acceleration);
 
-@property (nonatomic, readonly) SOMotionType motionType;
+@property (nonatomic, readonly) DSRMotionType motionType;
 @property (nonatomic, readonly) double currentSpeed;
 @property (nonatomic, readonly) CMAcceleration acceleration;
 @property (nonatomic, readonly) BOOL isShaking;

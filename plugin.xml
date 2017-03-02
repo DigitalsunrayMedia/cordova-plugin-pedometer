@@ -21,12 +21,12 @@
         </config-file>
         <header-file src="src/ios/Pedometer.h" />
         <source-file src="src/ios/Pedometer.m" />
-        <source-file src="src/ios/SOLocationManager.h" />
-        <source-file src="src/ios/SOLocationManager.m" />
-        <source-file src="src/ios/SOMotionDetector.h" />
-        <source-file src="src/ios/SOMotionDetector.m" />
-        <source-file src="src/ios/SOStepDetector.h" />
-        <source-file src="src/ios/SOStepDetector.m" />
+        <source-file src="src/ios/DSRLocationManager.h" />
+        <source-file src="src/ios/DSRLocationManager.m" />
+        <source-file src="src/ios/DSRMotionDetector.h" />
+        <source-file src="src/ios/DSRMotionDetector.m" />
+        <source-file src="src/ios/DSRStepDetector.h" />
+        <source-file src="src/ios/DSRStepDetector.m" />
         <framework src="CoreMotion.framework" />
     </platform>
 </plugin>

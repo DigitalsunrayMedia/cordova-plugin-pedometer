@@ -26,7 +26,7 @@
 #import "Cordova/CDVViewController.h"
 #import "CoreMotion/CoreMotion.h"
 #import "Pedometer.h"
-#import "SOMotionDetector.h"
+#import "DSRMotionDetector.h"
 
 @interface NSDate (PedometerUtils)
 
@@ -336,9 +336,9 @@ numberOfSteps, NSError *error) {
 
 - (void)startActivityUpdates:(CDVInvokedUrlCommand *)command{
     __block CDVPluginResult* pluginResult = nil;
-    [SOMotionDetector sharedInstance].useM7IfAvailable = YES;
+    [DSRMotionDetector sharedInstance].useM7IfAvailable = YES;
     
-    [SOMotionDetector sharedInstance].motionTypeChangedBlock = ^(SOMotionType motionType) {
+    [DSRMotionDetector sharedInstance].motionTypeChangedBlock = ^(DSRMotionType motionType) {
         dispatch_async(dispatch_get_main_queue(), ^{
             
             NSDictionary* pedestrianData = @{
@@ -357,11 +357,11 @@ numberOfSteps, NSError *error) {
         });
     };
     
-    [[SOMotionDetector sharedInstance] startDetection];
+    [[DSRMotionDetector sharedInstance] startDetection];
 }
 
 - (void)stopActivityUpdates:(CDVInvokedUrlCommand*)command{
-    [[SOMotionDetector sharedInstance] stopDetection];
+    [[DSRMotionDetector sharedInstance] stopDetection];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];

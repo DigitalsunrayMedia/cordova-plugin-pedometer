@@ -1,14 +1,14 @@
 //
-//  SOLocationManager.m
+//  DSRLocationManager.m
 //  Heat
 //
 //  Created by Artur Mkrtchyan on 12/19/13.
 //  Copyright (c) 2013 Artur Mkrtchyan. All rights reserved.
 //
 
-#import "SOLocationManager.h"
+#import "DSRLocationManager.h"
 
-@implementation SOLocationManager
+@implementation DSRLocationManager
 
 - (id)init
 {
@@ -31,9 +31,9 @@
     return self;
 }
 
-+ (SOLocationManager *)sharedInstance
++ (DSRLocationManager *)sharedInstance
 {
-    __strong static SOLocationManager* instance = nil;
+    __strong static DSRLocationManager* instance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         instance = [[self alloc] init];
