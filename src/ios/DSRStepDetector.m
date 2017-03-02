@@ -10,7 +10,7 @@
 #import "DSRStepDetector.h"
 #import <CoreMotion/CoreMotion.h>
 
-#define kUpdateInterval 0.2f
+#define dsrUpdateInterval 0.2f
 @interface DSRStepDetector()
 
 @property (strong, nonatomic) CMMotionManager *motionManager;
@@ -37,10 +37,10 @@
     
     self.motionManager = [CMMotionManager new];
     
-    self.motionManager.accelerometerUpdateInterval = kUpdateInterval;
-    self.motionManager.deviceMotionUpdateInterval  = kUpdateInterval;
-    self.motionManager.gyroUpdateInterval          = kUpdateInterval;
-    self.motionManager.magnetometerUpdateInterval  = kUpdateInterval;
+    self.motionManager.accelerometerUpdateInterval = dsrUpdateInterval;
+    self.motionManager.deviceMotionUpdateInterval  = dsrUpdateInterval;
+    self.motionManager.gyroUpdateInterval          = dsrUpdateInterval;
+    self.motionManager.magnetometerUpdateInterval  = dsrUpdateInterval;
     self.motionManager.showsDeviceMovementDisplay  = YES;
     
     self.queue = [NSOperationQueue new];

@@ -26,10 +26,10 @@
 
 #import "DSRMotionDetector.h"
 
-CGFloat kMinimumSpeed        = 0.3f;
-CGFloat kMaximumWalkingSpeed = 1.9f;
-CGFloat kMaximumRunningSpeed = 7.5f;
-CGFloat kMinimumRunningAcceleration = 3.5f;
+CGFloat dsrMinimumSpeed        = 0.3f;
+CGFloat dsrMaximumWalkingSpeed = 1.9f;
+CGFloat dsrMaximumRunningSpeed = 7.5f;
+CGFloat dsrMinimumRunningAcceleration = 3.5f;
 
 @interface DSRMotionDetector()
 
@@ -64,7 +64,7 @@ CGFloat kMinimumRunningAcceleration = 3.5f;
     if (self) {
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleLocationChangedNotification:)
-                                                     name:LOCATION_DID_CHANGED_NOTIFICATION
+                                                     name:DSR_LOCATION_DID_CHANGED_NOTIFICATION
                                                    object:nil];
         self.motionManager = [[CMMotionManager alloc] init];
     }
@@ -165,22 +165,22 @@ CGFloat kMinimumRunningAcceleration = 3.5f;
 #pragma mark - Customization Methods
 - (void)setMinimumSpeed:(CGFloat)speed
 {
-    kMinimumSpeed = speed;
+    dsrMinimumSpeed = speed;
 }
 
 - (void)setMaximumWalkingSpeed:(CGFloat)speed
 {
-    kMaximumWalkingSpeed = speed;
+    dsrMaximumWalkingSpeed = speed;
 }
 
 - (void)setMaximumRunningSpeed:(CGFloat)speed
 {
-    kMaximumRunningSpeed = speed;
+    dsrMaximumRunningSpeed = speed;
 }
 
 - (void)setMinimumRunningAcceleration:(CGFloat)acceleration
 {
-    kMinimumRunningAcceleration = acceleration;
+    dsrMinimumRunningAcceleration = acceleration;
 }
 #pragma mark - Private Methods
 - (void)calculateMotionType
@@ -189,11 +189,11 @@ CGFloat kMinimumRunningAcceleration = 3.5f;
         return;
     }
     
-    if (_currentSpeed < kMinimumSpeed) {
+    if (_currentSpeed < dsrMinimumSpeed) {
         _motionType = MotionTypeNotMoving;
-    } else if (_currentSpeed <= kMaximumWalkingSpeed) {
+    } else if (_currentSpeed <= dsrMaximumWalkingSpeed) {
         _motionType = _isShaking ? MotionTypeRunning : MotionTypeWalking;
-    } else if (_currentSpeed <= kMaximumRunningSpeed) {
+    } else if (_currentSpeed <= dsrMaximumRunningSpeed) {
         _motionType = _isShaking ? MotionTypeRunning : MotionTypeAutomotive;
     } else {
         _motionType = MotionTypeAutomotive;
@@ -251,7 +251,7 @@ CGFloat kMinimumRunningAcceleration = 3.5f;
             
             double vectorSum = sqrt(accX_2 + accY_2 + accZ_2);
             
-            if (vectorSum >= kMinimumRunningAcceleration) {
+            if (vectorSum >= dsrMinimumRunningAcceleration) {
                 shakeCount++;
             }
             /*********************************/

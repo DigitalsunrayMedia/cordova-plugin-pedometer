@@ -115,7 +115,7 @@
         CLLocation *location = [locations lastObject];
         self.lastLocation = location;
         self.lastCoordinate = location.coordinate;
-        [[NSNotificationCenter defaultCenter] postNotificationName:LOCATION_DID_CHANGED_NOTIFICATION
+        [[NSNotificationCenter defaultCenter] postNotificationName:DSR_LOCATION_DID_CHANGED_NOTIFICATION
                                                             object:location
                                                           userInfo:@{@"location":location}];
     }
@@ -123,7 +123,7 @@
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
 {
-    [[NSNotificationCenter defaultCenter] postNotificationName:LOCATION_DID_FAILED_NOTIFICATION
+    [[NSNotificationCenter defaultCenter] postNotificationName:DSR_LOCATION_DID_FAILED_NOTIFICATION
                                                         object:error
                                                       userInfo:@{@"error":error}];
 }
@@ -133,7 +133,7 @@
     if (status == kCLAuthorizationStatusNotDetermined && [self.locationManager respondsToSelector:@selector(requestAlwaysAuthorization)]) {
         [self.locationManager requestAlwaysAuthorization];
     }
-    [[NSNotificationCenter defaultCenter] postNotificationName:LOCATION_AUTHORIZATION_STATUS_CHANGED_NOTIFICATION
+    [[NSNotificationCenter defaultCenter] postNotificationName:DSR_LOCATION_AUTHORIZATION_STATUS_CHANGED_NOTIFICATION
                                                         object:self
                                                       userInfo:@{@"status":@(status)}];
 }
