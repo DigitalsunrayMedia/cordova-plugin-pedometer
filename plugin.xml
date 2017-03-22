@@ -10,7 +10,7 @@
         <engine name="cordova" version=">=3.0.0" />
     </engines>
     <js-module src="www/pedometer.js" name="Pedometer">
-        <clobbers target="pedometer" />
+        <clobbers target="ipedometer" />
     </js-module>
     <platform name="ios">
         <config-file target="config.xml" parent="/*">
