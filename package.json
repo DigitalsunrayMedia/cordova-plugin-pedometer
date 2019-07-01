@@ -1,0 +1,19 @@
+{
+  "cordova": {
+    "id": "com.digitalsunray.pedometer",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "deprecated": false,
+  "description": "Steps",
+  "engines": [
+    {
+      "name": "cordova",
+      "version": ">=3.0.0"
+    }
+  ],
+  "license": "MIT",
+  "name": "com.digitalsunray.pedometer",
+  "version": "0.2.0"
+}
