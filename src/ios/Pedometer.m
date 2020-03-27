@@ -27,6 +27,7 @@
 #import "CoreMotion/CoreMotion.h"
 #import "Pedometer.h"
 #import "DSRMotionDetector.h"
+#import "LogToFileController.h"
 
 @interface NSDate (PedometerUtils)
 
@@ -40,6 +41,7 @@
 
 @interface Pedometer ()
 
+@property (nonatomic, strong) NSDateFormatter *hourDateFormatter;
 // Step counting iOS 7 and iOS 8+
 @property (nonatomic, strong) CMStepCounter *stepCounter;
 @property (nonatomic, strong) CMPedometer *pedometer;
@@ -48,6 +50,7 @@
 // Activity Tracking
 @property (nonatomic, strong) CMMotionActivityManager *motionActivityManager;
 @property (nonatomic, strong) NSOperationQueue *activityQueue;
+@property (nonatomic, strong) LogToFileController *logController;
 @end
 
 @implementation Pedometer
@@ -70,6 +73,8 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
                                  object:nil];
         
         self.currentStepCount = 0;
+        _hourDateFormatter = [[NSDateFormatter alloc] init];
+        [_hourDateFormatter setDateFormat:@"HH:mm:ss"];
         
         if( [CMPedometer class] ){
             self.pedometer = [[CMPedometer alloc] init];
@@ -79,7 +84,7 @@ NSString * const kDateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZ";
             self.stepQueue = [[NSOperationQueue alloc] init];
             self.stepQueue.maxConcurrentOperationCount = 1;
         }
-        
+        self.logController = [[LogToFileController alloc] init];
         self.motionActivityManager = [[CMMotionActivityManager alloc] init];
         self.activityQueue = [[NSOperationQueue alloc] init];
         self.activityQueue.maxConcurrentOperationCount = 1;
@@ -135,9 +140,9 @@ CDVCommandStatus_ERROR) messageAsBool:available];
 - (void)startPedometerUpdates:(CDVInvokedUrlCommand*)command{
     __block CDVPluginResult* pluginResult = nil;
     self.currentStepCount = 0;
-    
+    NSDate *startOfTheDay = [[NSCalendar currentCalendar] startOfDayForDate:[NSDate date]];
     if( self.pedometer ){
-        [self.pedometer startPedometerUpdatesFromDate:[NSDate date] withHandler:^(CMPedometerData *pedometerData, NSError 
+        [self.pedometer startPedometerUpdatesFromDate:startOfTheDay withHandler:^(CMPedometerData *pedometerData, NSError
 *error) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 if( error ){
@@ -153,8 +158,8 @@ localizedDescription]];
                                                      @"floorsDescended": dic[@"floorsDescended"]
                                                      };
                     
-                    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK 
-messageAsDictionary:pedestrianData];
+                    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                                 messageAsDictionary:pedestrianData];
                     [pluginResult setKeepCallbackAsBool:true];
                 }
                 
@@ -169,6 +174,7 @@ NSDate *timestamp, NSError *error) {
                     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error 
 localizedDescription]];
                 } else {
+                    [self->_logController logToFile:[NSString stringWithFormat:@"\n%s\n%@\nCMStepCounter:\npedometerData.numberOfSteps=%ld\nself.currentStepCount=%ld", __func__, [self.hourDateFormatter stringFromDate:[NSDate date]], (long)numberOfSteps, (long)self.currentStepCount.integerValue]];
                     NSInteger stepsTaken = numberOfSteps - self.currentStepCount.integerValue;
                     self.currentStepCount = @(self.currentStepCount.integerValue + stepsTaken);
                     NSDictionary* pedestrianData = @{
@@ -367,10 +373,11 @@ numberOfSteps, NSError *error) {
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-- (NSDictionary *)getStepDictonaryFromStepData: (CMPedometerData *)pedometerData and: (BOOL)increaseStepCount {
+- (NSDictionary *)getStepDictonaryFromStepData:(CMPedometerData *)pedometerData and:(BOOL)increaseStepCount {
     
     NSInteger stepsTaken, distance, floorsAscended, floorsDescended;
-    
+    [[NSDate date] convertToStringUsingDateFormat:@"HH:mm:ss"];
+    [_logController logToFile:[NSString stringWithFormat:@"\n%s\n%@\nCMPedometer:\npedometerData.numberOfSteps=%ld\nself.currentStepCount=%ld\n-----------", __func__, [self.hourDateFormatter stringFromDate:[NSDate date]], pedometerData.numberOfSteps.integerValue, self.currentStepCount.integerValue]];
     if (!pedometerData.numberOfSteps) {
         stepsTaken = -1;
     } else {
@@ -407,6 +414,28 @@ numberOfSteps, NSError *error) {
     
     return pedestrianData;
 
+}
+
+- (void)sharePedometerData:(CDVInvokedUrlCommand*)command {
+    UIViewController *topController = [self getTopMostViewController];
+    NSArray *emailActivity = @[UIActivityTypeMail];
+    NSURL *fileurl = [NSURL URLWithString:[_logController todayPath]];
+    NSArray *activityItems = @[@"tesasad", fileurl];
+    UIActivityViewController *shareActivity = [[UIActivityViewController alloc] initWithActivityItems:activityItems applicationActivities:emailActivity];
+    
+    [shareActivity setValue:@"steps logging" forKey:@"subject"];
+    [topController presentViewController:shareActivity animated:YES completion:nil];
+    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (UIViewController*) getTopMostViewController {
+  UIViewController *presentingViewController = [[[UIApplication sharedApplication] delegate] window].rootViewController;
+  while (presentingViewController.presentedViewController != nil) {
+    presentingViewController = presentingViewController.presentedViewController;
+  }
+  return presentingViewController;
 }
 
 @end
