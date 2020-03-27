@@ -40,4 +40,8 @@ Pedometer.prototype.getPedometerDataSinceDate = function (dateAsString, onSucces
     exec(onSuccess, onError, "Pedometer", "getPedometerDataSinceDate", [dateAsString]);
 };
 
+Pedometer.prototype.sharePedometerData = function (onSuccess, onError) {
+    exec(onSuccess, onError, "Pedometer", "sharePedometerData", [])
+};
+
 module.exports = new Pedometer();
